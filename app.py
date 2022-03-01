@@ -1,6 +1,5 @@
 """Blogly application."""
 
-from crypt import methods
 from flask import Flask, request, render_template, redirect, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, User, Post
@@ -104,3 +103,53 @@ def new_posts_form(user_id):
     """Show user post form"""
     user = User.query.get_or_404(user_id)
     return render_template("/posts/newPosts.html", user=user)
+
+
+@app.route('/users/<int:user_id>/posts/new', methods=["POST"])
+def new_posts(user_id):
+    """Submit and create new user posts"""
+    user = User.query.get_or_404(user_id)
+    new_post = Post(title=request.form['title'],
+                    content=request.form['content'], user=user)
+    db.session.add(new_post)
+    db.session.commit()
+    return redirect(f'/users/{user_id}')
+
+
+@app.route('/posts/<int:post_id>')
+def show_posts(post_id):
+    """Show user post info"""
+    post = Post.query.get_or_404(post_id)
+    return render_template('/posts/showPost.html', post=post)
+
+
+@app.route('/posts/<int:post_id>/edit')
+def post_form(post_id):
+    """Show edit post form"""
+    post = Post.query.get_or_404(post_id)
+    return render_template('/posts/editPost.html', post=post)
+
+
+@app.route('/posts/<int:post_id>/edit', methods=["POST"])
+def posts_update(post_id):
+    """Updating existing user posts"""
+
+    post = Post.query.get_or_404(post_id)
+    post.title = request.form['title']
+    post.content = request.form['content']
+
+    db.session.add(post)
+    db.session.commit()
+
+    return redirect(f"/users/{post.user_id}")
+
+
+@app.route('/posts/<int:post_id>/delete', methods=["POST"])
+def del_post(post_id):
+    """Deleting existing user posts"""
+    post = Post.query.get_or_404(post_id)
+
+    db.session.delete(post)
+    db.session.commit()
+
+    return redirect(f"/users/{post.user_id}")
