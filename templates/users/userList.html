@@ -1,0 +1,14 @@
+{% extends 'users/layout.html' %}
+
+{% block title %}User Listing{% endblock %}
+
+{% block content %}
+<h1 class="display-4">Users</h1>
+{% for user in users %}
+<li><a href="/users/{{user.id}}">{{user.full_name}}</a></li>
+{% endfor %}
+
+<form action="users/new" class="mt-5">
+    <button class="btn btn-secondary">Add user</button>
+</form>
+{% endblock %}

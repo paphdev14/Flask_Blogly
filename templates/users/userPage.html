@@ -1,0 +1,46 @@
+{% extends 'users/layout.html' %}
+
+{% block title %}{{user.full_name}}{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <!-- Image -->
+    {% if user.image_url %}
+    <div class="col-sm-2 col-6">
+        <img src="{{user.image_url}}" 
+        alt="{{user.full_name}}"
+        class="img-fluid">
+    </div>
+    {% endif %}
+    
+    <div class="col-sm-10 col-12">
+        <!-- Fullname -->
+        <h1>{{user.full_name}}</h1>
+       
+        <!-- Form for edit and delete btn -->
+        <form>
+            <!-- Edit -->
+            <button class="btn btn-primary"
+                    formaction="/users/{{user.id}}/edit"
+                    formmethod="get">
+                    Edit
+            </button>
+            <!-- Delete -->
+            <button class="btn btn-danger"
+                    formaction="/users/{{user.id}}/delete"
+                    formmethod="post">
+                    Delete
+            </button>
+        </form>
+
+        <h2 class="mt-4">Posts</h2>
+
+        <span><a href="/users/{{user.id}}/posts/new" class="btn btn-primary">Add Post</a></span>
+    </div>
+    
+
+</div>
+
+
+{% endblock %}
