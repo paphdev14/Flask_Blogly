@@ -2,7 +2,7 @@
 
 from flask import Flask, request, render_template, redirect, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
-from models import db, connect_db, User, Post
+from models import db, connect_db, User, Post, Tag, PostTag
 
 app = Flask(__name__)
 
@@ -102,15 +102,22 @@ def delete_user(user_id):
 def new_posts_form(user_id):
     """Show user post form"""
     user = User.query.get_or_404(user_id)
-    return render_template("/posts/newPosts.html", user=user)
+    tags = Tag.query.all()
+    return render_template("/posts/newPosts.html", user=user, tags=tags)
 
 
 @app.route('/users/<int:user_id>/posts/new', methods=["POST"])
 def new_posts(user_id):
     """Submit and create new user posts"""
     user = User.query.get_or_404(user_id)
+
+    """Copied & pasted that piece of code below, but don't really get it in full"""
+    tag_ids = [int(num) for num in request.form.getlist("tags")]
+    tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
+    """Copied & pasted that piece of code above, but don't really get it in full"""
+
     new_post = Post(title=request.form['title'],
-                    content=request.form['content'], user=user)
+                    content=request.form['content'], user=user, tags=tags)
     db.session.add(new_post)
     db.session.commit()
     return redirect(f'/users/{user_id}')
@@ -127,7 +134,8 @@ def show_posts(post_id):
 def post_form(post_id):
     """Show edit post form"""
     post = Post.query.get_or_404(post_id)
-    return render_template('/posts/editPost.html', post=post)
+    tags = Tag.query.all()
+    return render_template('/posts/editPost.html', post=post, tags=tags)
 
 
 @app.route('/posts/<int:post_id>/edit', methods=["POST"])
@@ -137,6 +145,9 @@ def posts_update(post_id):
     post = Post.query.get_or_404(post_id)
     post.title = request.form['title']
     post.content = request.form['content']
+
+    tag_ids = [int(num) for num in request.form.getlist("tags")]
+    post.tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
 
     db.session.add(post)
     db.session.commit()
@@ -153,3 +164,6 @@ def del_post(post_id):
     db.session.commit()
 
     return redirect(f"/users/{post.user_id}")
+
+
+# ===================== Tags Routes ===================== #
